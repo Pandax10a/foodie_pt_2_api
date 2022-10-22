@@ -55,6 +55,28 @@ CREATE TABLE `client_session` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `menu_item`
+--
+
+DROP TABLE IF EXISTS `menu_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `menu_item` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(10) unsigned DEFAULT NULL,
+  `name` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `description` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `price` int(10) unsigned DEFAULT NULL,
+  `image_url` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `last_updated_on` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `menu_item_FK` (`restaurant_id`),
+  CONSTRAINT `menu_item_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `restaurant`
 --
 
@@ -78,6 +100,24 @@ CREATE TABLE `restaurant` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `restaurant_session`
+--
+
+DROP TABLE IF EXISTS `restaurant_session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `restaurant_session` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(10) unsigned DEFAULT NULL,
+  `token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `restaurant_session_FK` (`restaurant_id`),
+  CONSTRAINT `restaurant_session_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping routines for database 'foodie_pt_2'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -90,4 +130,4 @@ CREATE TABLE `restaurant` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-22  8:40:35
+-- Dump completed on 2022-10-22  9:08:04
