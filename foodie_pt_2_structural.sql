@@ -52,7 +52,7 @@ CREATE TABLE `client_session` (
   PRIMARY KEY (`id`),
   KEY `client_session_FK` (`client_id`),
   CONSTRAINT `client_session_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,9 +192,10 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `client_login`(email_input varchar(100), password_input varchar(150), token_input varchar(100))
     MODIFIES SQL DATA
 begin
-	insert into client_session (client_id, token)
-	select id, token_input from client
-	where email=email_input and password=PASSWORD(CONCAT(password_input, (select salt from client where email = email_input)));	
+	insert into client_session (client_id, token, created_at)
+	select id, token_input, now() from client
+	where email=email_input and password=PASSWORD(CONCAT(password_input, (select salt from client where email = email_input)));
+	
 	
 	select ROW_COUNT();
 	commit;
@@ -242,4 +243,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-22 16:00:44
+-- Dump completed on 2022-10-25 16:41:49
