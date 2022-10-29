@@ -32,9 +32,10 @@ CREATE TABLE `client` (
   `created_at` datetime DEFAULT NULL,
   `password` varchar(150) COLLATE utf8mb4_bin DEFAULT NULL,
   `salt` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `client_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,13 +47,13 @@ DROP TABLE IF EXISTS `client_session`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `client_session` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `client_id` int(10) unsigned DEFAULT NULL,
+  `client_id` int(10) unsigned NOT NULL,
   `token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `client_session_FK` (`client_id`),
   CONSTRAINT `client_session_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,9 +136,10 @@ CREATE TABLE `restaurant` (
   `password` varchar(150) COLLATE utf8mb4_bin DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `salt` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `restaurant_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,13 +151,14 @@ DROP TABLE IF EXISTS `restaurant_session`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `restaurant_session` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `restaurant_id` int(10) unsigned DEFAULT NULL,
+  `restaurant_id` int(10) unsigned NOT NULL,
   `token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `restaurant_session_un` (`token`),
   KEY `restaurant_session_FK` (`restaurant_id`),
   CONSTRAINT `restaurant_session_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -193,13 +196,19 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `client_login`(email_input varchar(100), password_input varchar(150), token_input varchar(100))
     MODIFIES SQL DATA
-begin
-	insert into client_session (client_id, token, created_at)
-	select id, token_input, now() from client
-	where email=email_input and password=PASSWORD(CONCAT(password_input, (select salt from client where email = email_input)));
+BEGIN
+	
+	
 	
 	
-	select ROW_COUNT();
+	
+	insert into client_session (token, created_at, client_id)
+	VALUES
+	(token_input, now(), (SELECT id  FROM client
+	WHERE email=email_input AND password=PASSWORD(CONCAT(password_input, (select salt where email = email_input)))));
+	
+	
+	select ROW_COUNT(), last_insert_id();
 	commit;
 END ;;
 DELIMITER ;
@@ -226,6 +235,28 @@ BEGIN
 	WHERE cs.token = token_input AND c.password=PASSWORD(concat(password_input, 
 	(SELECT salt WHERE 
 	token = token_input)));
+	COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `delete_restaurant` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_restaurant`(token_input varchar(100), password_input varchar(100))
+    MODIFIES SQL DATA
+BEGIN
+	DELETE r FROM restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
+	WHERE token = token_input AND password =PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input)));
 	COMMIT;
 END ;;
 DELIMITER ;
@@ -288,6 +319,53 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `restaurant_info` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `restaurant_info`(restaurant_id_input int unsigned)
+BEGIN
+	SELECT id, email, name, address, phone_number, bio, city, profile_url, banner_url, ROW_COUNT() FROM restaurant
+	WHERE id = restaurant_id_input;
+	
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `restaurant_login` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `restaurant_login`(email_input varchar(100), password_input varchar(150), token_input varchar(100))
+BEGIN
+	insert into restaurant_session (token, created_at, restaurant_id)
+	VALUES
+	(token_input, now(), (SELECT id  FROM restaurant
+	WHERE email=email_input AND password=PASSWORD(CONCAT(password_input, (select salt where email = email_input)))));
+	
+	
+	select ROW_COUNT(), last_insert_id();
+	commit;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `update_client` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -307,6 +385,34 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `update_restaurant` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_restaurant`(token_input varchar(100), email_input varchar(100), password_input varchar(150),
+name_input varchar(255), address_input varchar(255), phone_number_input varchar(20), bio_input varchar(255), city_input varchar(100), 
+profile_url_input varchar(255), banner_url_input varchar(255))
+BEGIN
+	update restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
+	SET r.email = email_input, r.password = PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input ))), r.address = address_input,
+	r.phone_number = phone_number_input, r.bio = bio_input, r.city = city_input, r.profile_url = profile_url_input,
+	r.banner_url=banner_url_input, r.last_updated = now()
+	WHERE token = token_input;
+	SELECT ROW_COUNT();
+	COMMIT;
+	
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -317,4 +423,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-29  9:37:39
+-- Dump completed on 2022-10-29 15:32:52
