@@ -134,9 +134,10 @@ CREATE TABLE `restaurant` (
   `banner_url` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `password` varchar(150) COLLATE utf8mb4_bin DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
+  `salt` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `restaurant_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,13 +273,13 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `new_restaurant`(email_input varchar(100), password_input varchar(150), name_input varchar(255),
 	address_input varchar(255), phone_number_input varchar(20), bio_input varchar(255), city_input varchar(100), profile_url_input varchar(255), 
-	banner_url_input varchar(255))
+	banner_url_input varchar(255), salt_input varchar(100))
     MODIFIES SQL DATA
 BEGIN
-	INSERT INTO restaurant (email, password, name, address, phone_number, bio, city, profile_url, banner_url, created_at)
+	INSERT INTO restaurant (email, password, name, address, phone_number, bio, city, profile_url, banner_url, created_at, salt)
 	VALUES
-	(email_input, password_input, name_input, address_input, phone_number_input, bio_input, city_input, profile_url_input,
-	banner_url_input, now());
+	(email_input, PASSWORD(concat(password_input, salt_input)), name_input, address_input, phone_number_input, bio_input, city_input, profile_url_input,
+	banner_url_input,  now(), salt_input);
 	SELECT ROW_COUNT(), last_insert_id();
 	COMMIT;
 END ;;
@@ -316,4 +317,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-29  9:28:25
+-- Dump completed on 2022-10-29  9:37:39
