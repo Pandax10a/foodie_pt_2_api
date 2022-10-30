@@ -35,7 +35,7 @@ CREATE TABLE `client` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `client_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,9 +51,10 @@ CREATE TABLE `client_session` (
   `token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `client_session_un` (`token`),
   KEY `client_session_FK` (`client_id`),
   CONSTRAINT `client_session_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,7 +140,7 @@ CREATE TABLE `restaurant` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `restaurant_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +159,7 @@ CREATE TABLE `restaurant_session` (
   UNIQUE KEY `restaurant_session_un` (`token`),
   KEY `restaurant_session_FK` (`restaurant_id`),
   CONSTRAINT `restaurant_session_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -376,9 +377,17 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `update_client`(token_input varchar(100), email_input varchar(100), username_input varchar(100), first_name_input varchar(100), 
-last_name_input varchar(100), image_url_input varchar(255), password_input varchar(100))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_client`(token_input varchar(100), email_input varchar(100), username_input varchar(100), 
+first_name_input varchar(100), last_name_input varchar(100), image_url_input varchar(255), password_input varchar(100))
+    MODIFIES SQL DATA
 BEGIN
+	UPDATE client c INNER JOIN client_session cs ON cs.client_id = c.id
+	SET email = email_input, username = username_input, first_name = first_name_input, last_name = last_name_input,
+	image_url = image_url_input, c.password = PASSWORD(CONCAT(password_input, (SELECT salt WHERE token = token_input))), last_updated = now()
+	WHERE token = token_input;
+	
+	SELECT ROW_COUNT();
+	COMMIT;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -398,6 +407,7 @@ DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_restaurant`(token_input varchar(100), email_input varchar(100), password_input varchar(150),
 name_input varchar(255), address_input varchar(255), phone_number_input varchar(20), bio_input varchar(255), city_input varchar(100), 
 profile_url_input varchar(255), banner_url_input varchar(255))
+    MODIFIES SQL DATA
 BEGIN
 	update restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
 	SET r.email = email_input, r.password = PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input ))), r.address = address_input,
@@ -423,4 +433,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-29 15:32:52
+-- Dump completed on 2022-10-30 15:01:35
