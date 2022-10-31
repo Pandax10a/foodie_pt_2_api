@@ -66,7 +66,7 @@ DROP TABLE IF EXISTS `menu_item`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `menu_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `restaurant_id` int(10) unsigned DEFAULT NULL,
+  `restaurant_id` int(10) unsigned NOT NULL,
   `name` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
   `description` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `price` int(10) unsigned DEFAULT NULL,
@@ -291,6 +291,29 @@ BEGIN
 	SELECT ROW_COUNT();
 	COMMIT;
 	
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `delete_menu_item` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_menu_item`(token_input varchar(100), menu_id_input int unsigned)
+    MODIFIES SQL DATA
+BEGIN
+	DELETE mi FROM menu_item mi INNER JOIN restaurant r ON mi.restaurant_id = r.id INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id 
+	WHERE token = token_input AND mi.id = menu_id_input;
+	SELECT ROW_COUNT();
+	COMMIT;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -580,4 +603,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-10-31 15:03:43
+-- Dump completed on 2022-10-31 15:29:59
