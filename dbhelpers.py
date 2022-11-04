@@ -42,22 +42,6 @@ def cursor_result(cursor, the_procedure, list_of_args=[]):
         return str(error)
 
 
-def run_statement(statement, list_of_args=[]):
-    cursor = just_connect()
-    if(cursor == None):
-        return "Connection Error"
-    result = cursor_result(cursor, statement, list_of_args)
-    if(type(result) == list):
-        the_closer(cursor)
-        return result
-    elif(result == "Connection Error"):
-        return "Connection error"
-    elif(result == None):
-        return "Statement Error"
-    the_closer(cursor)
-    return result
-
-
 
 
 def cursor_no_result(cursor, the_procedure, list_of_args=[]):
