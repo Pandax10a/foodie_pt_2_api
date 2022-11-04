@@ -35,7 +35,7 @@ CREATE TABLE `client` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `client_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,7 +54,7 @@ CREATE TABLE `client_session` (
   UNIQUE KEY `client_session_un` (`token`),
   KEY `client_session_FK` (`client_id`),
   CONSTRAINT `client_session_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,7 +146,7 @@ CREATE TABLE `restaurant` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `restaurant_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +247,7 @@ BEGIN
 	WHERE email=email_input AND password=PASSWORD(CONCAT(password_input, (select salt where email = email_input)))));
 	
 	
-	select ROW_COUNT(), last_insert_id();
+	select ROW_COUNT(), last_insert_id(), CONVERT(token_input USING utf8);
 	commit;
 END ;;
 DELIMITER ;
@@ -299,6 +299,7 @@ BEGIN
 	WHERE cs.token = token_input AND c.password=PASSWORD(concat(password_input, 
 	(SELECT salt WHERE 
 	token = token_input)));
+	SELECT ROW_COUNT();
 	COMMIT;
 END ;;
 DELIMITER ;
@@ -541,7 +542,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `restaurant_info`(restaurant_id_input int unsigned)
 BEGIN
-	SELECT id, email, name, address, phone_number, bio, city, profile_url, banner_url, ROW_COUNT() FROM restaurant
+	SELECT id, CONVERT(email USING utf8), CONVERT(name USING utf8), CONVERT(address USING utf8), 
+	CONVERT(phone_number USING utf8), CONVERT(bio USING utf8), CONVERT(city USING utf8), 
+	CONVERT(profile_url USING utf8), CONVERT(banner_url USING utf8), ROW_COUNT() FROM restaurant
 	WHERE id = restaurant_id_input;
 	
 END ;;
@@ -737,4 +740,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-03 16:31:32
+-- Dump completed on 2022-11-04 15:04:51

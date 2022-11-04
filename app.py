@@ -107,6 +107,20 @@ def new_restaurant():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
+# get request, provide 1 argument, the restaurant id, and then it returns information regarding that 1 restaurant
+
+@app.get('/api/restaurant')
+def get_restaurant_info():
+    valid_check=a.check_endpoint_info(request.args, ['restaurant_id'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL restaurant_info(?)', [request.args.get('restaurant_id')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
 
 
 
