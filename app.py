@@ -57,6 +57,8 @@ def delete_client():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
+
+
 # uses 2 argument and returns token value.  the value is checkd and argument is checked first before token is generated in python
 @app.post('/api/client-login')
 
@@ -72,7 +74,7 @@ def client_login():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
-# @app.patch('/api/client') will get back to this
+# @app.patch('/api/client') will get back to this ------------------------------------------------------------
 
 # def update_client():
 #     valid_check=a.check_endpoint_info(request.json, ['token', 'email', 'username'])
@@ -134,6 +136,8 @@ def delete_restaurant():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
+# patch for restaurant update -----------------------------------------------------------
+
 # restaurant login needs email, password, token as argument
 @app.post('/api/restaurant-login')
 def restaurant_login():
@@ -170,6 +174,35 @@ def show_all_restaurant():
         return make_response(json.dumps(result, default=str), 200)
     else:
         return make_response(json.dumps(result, default=str), 400)
+
+#this method uses 5 argument, and adds a menu item to database
+@app.post('/api/menu')
+def add_menu_item_for_restaurant():
+    value_check=a.check_endpoint_info(request.json, ['token', 'name', 'img_url', 'description', 'price'])
+    if(value_check != None):
+        return make_response(json.dumps(value_check, default=str), 400)
+
+    result = dh.run_statement('CALL add_new_item_restaurant(?,?,?,?,?)', [request.json.get('token'), request.json.get('name'), 
+    request.json.get('img_url'), request.json.get('description'), request.json.get('price')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# get menu from restaurant, uses 1 argument, the restaurant id
+@app.get('/api/menu')
+def get_menu_from_restaurant():
+    valid_check = a.check_endpoint_info(request.args, ['restaurant_id'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    result = dh.run_statement('CALL get_menu(?)', [request.args.get('restaurant_id')])
+    if(type(result)== list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+    
+
 
 
 if(d.production_mode == True):

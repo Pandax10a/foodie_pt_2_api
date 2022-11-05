@@ -76,7 +76,7 @@ CREATE TABLE `menu_item` (
   PRIMARY KEY (`id`),
   KEY `menu_item_FK` (`restaurant_id`),
   CONSTRAINT `menu_item_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,7 +410,8 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `get_menu`(restaurant_id_input int unsigned)
 BEGIN
-	SELECT id, name, description, image_url, price FROM menu_item
+	SELECT id, CONVERT(name USING utf8), CONVERT(description USING utf8), 
+	CONVERT(image_url USING utf8), price FROM menu_item
 	WHERE restaurant_id = restaurant_id_input;
 END ;;
 DELIMITER ;
@@ -743,4 +744,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-04 19:36:24
+-- Dump completed on 2022-11-05  7:40:46
