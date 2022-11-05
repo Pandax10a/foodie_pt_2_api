@@ -201,6 +201,61 @@ def get_menu_from_restaurant():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
+# using 2 argument, token and menu_id to delete item from menu_item in database
+@app.delete('/api/menu')
+def delete_menu_item():
+    valid_check = a.check_endpoint_info(request.json, ['token', 'menu_id'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL delete_menu_item(?,?)', [request.json.get('token'), request.json.get('menu_id')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# update menu
+# @app.patch(')
+
+#client create an order
+@app.post('/api/client-order')
+def new_client_order():
+    valid_check=a.check_endpoint_info(request.json, ['client_token', 'menu_item', 'quantity', 'restaurant_id'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL new_client_order(?,?,?,?)', [request.json.get('client_token'), request.json.get('menu_item'), 
+    request.json.get('quantity'), request.json.get('restaurant_id')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# view order as client, it needs 1 argument, a valid client token
+@app.get('/api/client-order')
+def view_order_as_client():
+    valid_check=a.check_endpoint_info(request.args, ['token'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    result = dh.run_statement('CALL client_view_order(?)', [request.args.get('token')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# view order as restaurant, uses 1 argument, a valid token
+@app.get('/api/restaurant-order')
+def view_order_as_restaurant():
+    valid_check=a.check_endpoint_info(request.args, ['token'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    result = dh.run_statement('CALL restaurant_view_order(?)', [request.args.get('token')])
+    if (type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+
     
 
 

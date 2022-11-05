@@ -35,7 +35,7 @@ CREATE TABLE `client` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `client_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,7 +54,7 @@ CREATE TABLE `client_session` (
   UNIQUE KEY `client_session_un` (`token`),
   KEY `client_session_FK` (`client_id`),
   CONSTRAINT `client_session_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `order` (
   KEY `order_FK_1` (`restaurant_id`),
   CONSTRAINT `order_FK` FOREIGN KEY (`client_id`) REFERENCES `client` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `order_FK_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -120,7 +120,7 @@ CREATE TABLE `order_menu_item` (
   KEY `order_menu_item_FK_1` (`order_id`),
   CONSTRAINT `order_menu_item_FK` FOREIGN KEY (`menu_item_id`) REFERENCES `menu_item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `order_menu_item_FK_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,7 +267,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `client_view_order`(token_input varchar(100))
 BEGIN
-	SELECT o.id, o.created_at, o.last_updated_on, is_confirmed, is_complete, mi.name, mi.price, mi.id  
+	SELECT o.id, o.created_at, o.last_updated_on, is_confirmed, is_complete, CONVERT(mi.name USING utf8), mi.price, mi.id  
 	FROM client c INNER JOIN client_session cs ON cs.client_id = c.id
 	INNER JOIN `order` o ON o.client_id = c.id
 	INNER JOIN order_menu_item omi ON omi.order_id = o.id
@@ -457,8 +457,8 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `new_client_order`(client_token_input varchar(100), menu_item_input int UNSIGNED, quantity_input SMALLINT UNSIGNED,
-restaurant_id_input int UNSIGNED)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `new_client_order`(client_token_input varchar(100), menu_item_input int UNSIGNED, 
+quantity_input SMALLINT UNSIGNED, restaurant_id_input int UNSIGNED)
     MODIFIES SQL DATA
 BEGIN
 	INSERT INTO `order`(created_at, client_id, restaurant_id, is_confirmed, is_complete)
@@ -593,7 +593,7 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `restaurant_view_order`(token_input varchar(100))
 BEGIN
-	SELECT o.id, mi.name, mi.price, omi.menu_item_id, o.is_complete, o.is_confirmed
+	SELECT o.id, CONVERT(mi.name USING utf8), mi.price, omi.menu_item_id, o.is_complete, o.is_confirmed
 	FROM restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
 	INNER JOIN menu_item mi ON mi.restaurant_id = rs.restaurant_id
 	INNER JOIN `order` o ON o.restaurant_id = rs.restaurant_id 
@@ -744,4 +744,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-05  7:40:46
+-- Dump completed on 2022-11-05  8:26:44
