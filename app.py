@@ -75,6 +75,18 @@ def client_login():
         return make_response(json.dumps(result, default=str), 400)
 
 # @app.patch('/api/client') will get back to this ------------------------------------------------------------
+@app.patch('/api/client')
+def update_client_info():
+    valid_check = a.check_endpoint_info(request.json, ['token'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL get_client_info_token(?)', [request.json.get('token')])
+    result = a.fill_optional_data(request.json, result[0], ['email', 'username', 'first_name', 'last_name', 'img_url', 'password'])
+
+    result = dh.run_statement('CALL update_client(?,?,?,?,?,?,?)', [request.json.get('token'), result['email'], result['username'],
+    result['first_name'], result['last_name'], result['img_url'], result['password']])
+    
 
 # def update_client():
 #     valid_check=a.check_endpoint_info(request.json, ['token', 'email', 'username'])
@@ -137,6 +149,20 @@ def delete_restaurant():
         return make_response(json.dumps(result, default=str), 400)
 
 # patch for restaurant update -----------------------------------------------------------
+@app.patch('/api/restaurant')
+def update_restaurant_info():
+    valid_check= a.check_endpoint_info(request.json, ['token', 'email', 'password', 'name', 'address', 'phone', 'bio', 'city', 'profile_url', 
+    'banner_url'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL update_restaurant(?,?,?,?,?,?,?,?,?,?)', [request.json.get('token'), request.json.get('email'),
+    request.json.get('password'), request.json.get('name'), request.json.get('address'), request.json.get('phone'), request.json.get('bio'),
+    request.json.get('city'), request.json.get('profile_url'), request.json.get('banner_url')])
+    if(type(result)== list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
 
 # restaurant login needs email, password, token as argument
 @app.post('/api/restaurant-login')
@@ -251,6 +277,20 @@ def view_order_as_restaurant():
         return make_response(json.dumps(valid_check, default=str), 400)
     result = dh.run_statement('CALL restaurant_view_order(?)', [request.args.get('token')])
     if (type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# for restaurant to confirm the confirm and complete using patch with 4 argument
+@app.patch('/api/restaurant-order')
+def restaurant_confirm_complete():
+    valid_check = a.check_endpoint_info(request.json, ['token', 'order_id', 'is_confirmed', 'is_complete'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+
+    result = dh.run_statement('CALL restaurant_confirm_complete(?,?,?,?)', [request.json.get('token'), request.json.get('order_id'),
+    request.json.get('is_confirmed'), request.json.get('is_complete')])
+    if(type(result)==list):
         return make_response(json.dumps(result, default=str), 200)
     else:
         return make_response(json.dumps(result, default=str), 400)

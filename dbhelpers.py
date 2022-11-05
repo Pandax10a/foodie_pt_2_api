@@ -92,3 +92,11 @@ def run_statement(statement, list_of_args=[]):
         return "Statement Error"
     the_closer(cursor)
     return result
+
+    # create dictionary using database data
+    def make_dictionary(results, cursor):
+        columns = [i[0] for i in cursor.description]
+        new_results = []
+        for row in results:
+            new_results.append(dict(zip(columns, row)))
+        return new_results

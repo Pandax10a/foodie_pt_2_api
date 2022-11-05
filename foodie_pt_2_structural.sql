@@ -398,6 +398,28 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `get_client_info_token` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `get_client_info_token`(token_input varchar(100))
+BEGIN
+	SELECT CONVERT(c.email USING utf8), CONVERT(c.username USING utf8), CONVERT(c.first_name USING utf8), 
+	CONVERT(c.last_name USING utf8), CONVERT(c.image_url USING utf8), CONVERT(c.password USING utf8)
+	FROM client c INNER JOIN client_session cs ON cs.client_id = c.id 
+	WHERE token = token_input;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `get_menu` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -522,7 +544,7 @@ is_complete_input bool)
 BEGIN
 	UPDATE `order` o INNER JOIN restaurant r ON o.restaurant_id = r.id
 	INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
-	SET o.is_complete = is_complete_input, o.is_confirmed = is_confirmed_input
+	SET o.is_complete = is_complete_input, o.is_confirmed = is_confirmed_input, o.last_updated_on = now()
 	WHERE token = token_input AND o.id = order_id_input;
 	SELECT ROW_COUNT();
 	COMMIT;
@@ -722,7 +744,7 @@ profile_url_input varchar(255), banner_url_input varchar(255))
 BEGIN
 	update restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
 	SET r.email = email_input, r.password = PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input ))), r.address = address_input,
-	r.phone_number = phone_number_input, r.bio = bio_input, r.city = city_input, r.profile_url = profile_url_input,
+	r.phone_number = phone_number_input, r.bio = bio_input, r.city = city_input, r.profile_url = profile_url_input, r.name =name_input,
 	r.banner_url=banner_url_input, r.last_updated = now()
 	WHERE token = token_input;
 	SELECT ROW_COUNT();
@@ -744,4 +766,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-05  8:26:44
+-- Dump completed on 2022-11-05  9:41:53
