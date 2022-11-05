@@ -146,7 +146,7 @@ CREATE TABLE `restaurant` (
   `last_updated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `restaurant_un` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -165,7 +165,7 @@ CREATE TABLE `restaurant_session` (
   UNIQUE KEY `restaurant_session_un` (`token`),
   KEY `restaurant_session_FK` (`restaurant_id`),
   CONSTRAINT `restaurant_session_FK` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -367,7 +367,8 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `delete_restaurant`(token_input varc
     MODIFIES SQL DATA
 BEGIN
 	DELETE r FROM restaurant r INNER JOIN restaurant_session rs ON rs.restaurant_id = r.id
-	WHERE token = token_input AND password =PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input)));
+	WHERE token = token_input AND password =PASSWORD(concat(password_input, (SELECT salt WHERE token = token_input)));
+	SELECT ROW_COUNT();
 	COMMIT;
 END ;;
 DELIMITER ;
@@ -544,7 +545,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `restaurant_info`(restaurant_id_inpu
 BEGIN
 	SELECT id, CONVERT(email USING utf8), CONVERT(name USING utf8), CONVERT(address USING utf8), 
 	CONVERT(phone_number USING utf8), CONVERT(bio USING utf8), CONVERT(city USING utf8), 
-	CONVERT(profile_url USING utf8), CONVERT(banner_url USING utf8), ROW_COUNT() FROM restaurant
+	CONVERT(profile_url USING utf8), CONVERT(banner_url USING utf8) FROM restaurant
 	WHERE id = restaurant_id_input;
 	
 END ;;
@@ -571,7 +572,7 @@ BEGIN
 	WHERE email=email_input AND password=PASSWORD(CONCAT(password_input, (select salt where email = email_input)))));
 	
 	
-	select ROW_COUNT(), last_insert_id();
+	select ROW_COUNT(), last_insert_id(), CONVERT(token_input USING utf8);
 	commit;
 END ;;
 DELIMITER ;
@@ -615,7 +616,9 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `show_all_restaurant`()
 BEGIN
-	SELECT email, name, address, phone_number, bio, city, profile_url, banner_url, id FROM restaurant;
+	SELECT CONVERT(email USING utf8), CONVERT(name USING utf8), CONVERT(address USING utf8), 
+	CONVERT(phone_number USING utf8), CONVERT(bio USING utf8), CONVERT(city USING utf8), CONVERT(profile_url USING utf8), 
+	CONVERT(banner_url USING utf8), id FROM restaurant;
 	
 
 END ;;
@@ -740,4 +743,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-04 15:04:51
+-- Dump completed on 2022-11-04 19:36:24

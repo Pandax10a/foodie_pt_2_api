@@ -162,7 +162,14 @@ def delete_restaurant_token():
         return make_response(json.dumps(result, default=str), 400)
 
 
-
+# this does not need argument and returns all restaurant in database
+@app.get('/api/restaurants')
+def show_all_restaurant():
+    result = dh.run_statement('CALL show_all_restaurant()')
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
 
 
 if(d.production_mode == True):
