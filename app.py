@@ -1,5 +1,5 @@
 
-from unittest import result
+
 from uuid import uuid4
 from flask import Flask, make_response, request
 import dbhelpers as dh
@@ -148,7 +148,18 @@ def restaurant_login():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
-
+# restaurant delete token for logging out only needs token as argument
+@app.delete('/api/restaurant-login')
+def delete_restaurant_token():
+    valid_check = a.check_endpoint_info(request.json, ['token'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+    
+    result = dh.run_statement('CALL delete_restaurant_token(?)', [request.json.get('token')])
+    if (type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
 
 
 
