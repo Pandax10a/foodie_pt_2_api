@@ -121,6 +121,33 @@ def get_restaurant_info():
     else:
         return make_response(json.dumps(result, default=str), 400)
 
+# delete restaurant from database it needs token and password as argument
+@app.delete('/api/restaurant')
+def delete_restaurant():
+    valid_check=a.check_endpoint_info(request.json, ['token', 'password'])
+    if (valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+
+    result = dh.run_statement('CALL delete_restaurant(?,?)', [request.json.get('token'), request.json.get('password')])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
+# restaurant login needs email, password, token as argument
+@app.post('/api/restaurant-login')
+def restaurant_login():
+    token = uuid4().hex
+    valid_check = a.check_endpoint_info(request.json, ['email', 'password'])
+    if(valid_check != None):
+        return make_response(json.dumps(valid_check, default=str), 400)
+
+    result = dh.run_statement('CALL restaurant_login(?,?,?)', [request.json.get('email'), request.json.get('password'), token])
+    if(type(result) == list):
+        return make_response(json.dumps(result, default=str), 200)
+    else:
+        return make_response(json.dumps(result, default=str), 400)
+
 
 
 
